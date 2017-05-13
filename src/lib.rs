@@ -35,7 +35,7 @@ pub fn neighbors(point: Point) -> Vec<Point> {
         .collect()
 }
 
-#[derive(Eq, PartialEq, Debug)]
+#[derive(Debug)]
 pub struct Grid {
     cells: HashMap<Point, u64>,
     generation: u64,
