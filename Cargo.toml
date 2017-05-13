@@ -3,4 +3,6 @@ name = "gol"
 version = "0.1.0"
 authors = ["tlrobrn <obrien.taylorm@gmail.com>"]
 
-[dependencies]
+[lib]
+name = "gol"
+path = "src/lib.rs"
