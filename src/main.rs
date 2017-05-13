@@ -6,7 +6,7 @@ fn main() {
                   Point { x: 1, y: 0 },
                   Point { x: 2, y: 0 }];
 
-    let mut grid = Grid::new(points.iter());
+    let mut grid = Grid::with_points(points.iter());
 
     for _ in 0..1001 {
         grid.tick();

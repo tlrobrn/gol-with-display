@@ -42,7 +42,14 @@ pub struct Grid {
 }
 
 impl Grid {
-    pub fn new<'a, I>(points: I) -> Self
+    pub fn empty() -> Self {
+        Grid {
+            cells: HashMap::new(),
+            generation: 0,
+        }
+    }
+
+    pub fn with_points<'a, I>(points: I) -> Self
         where I: Iterator<Item = &'a Point>
     {
         let mut cells = HashMap::new();
@@ -125,7 +132,7 @@ mod tests {
     #[test]
     fn grid_contains_point_initialized_with() {
         let points = [Point { x: 5, y: 2 }];
-        let g = Grid::new(points.iter());
+        let g = Grid::with_points(points.iter());
 
         assert!(g.cells.contains_key(&points[0]));
         assert_eq!(1, g.cells.len());
@@ -136,7 +143,7 @@ mod tests {
         let points = [Point { x: 0, y: 0 },
                       Point { x: 5, y: 2 },
                       Point { x: 5, y: 3 }];
-        let mut g = Grid::new(points.iter());
+        let mut g = Grid::with_points(points.iter());
         g.tick();
 
         assert_eq!(0, g.cells.len());
@@ -149,7 +156,7 @@ mod tests {
                       Point { x: 1, y: 1 },
                       Point { x: 1, y: 2 },
                       Point { x: 0, y: 1 }];
-        let mut g = Grid::new(points.iter());
+        let mut g = Grid::with_points(points.iter());
         g.cells.insert(Point { x: 0, y: 0 }, 0);
 
         g.tick();
@@ -161,7 +168,7 @@ mod tests {
         let points = [Point { x: 0, y: 1 },
                       Point { x: -1, y: 0 },
                       Point { x: 1, y: 0 }];
-        let mut g = Grid::new(points.iter());
+        let mut g = Grid::with_points(points.iter());
 
         g.tick();
 
@@ -174,7 +181,7 @@ mod tests {
         let points = [Point { x: 5, y: 1 },
                       Point { x: 5, y: 2 },
                       Point { x: 5, y: 3 }];
-        let mut g = Grid::new(points.iter());
+        let mut g = Grid::with_points(points.iter());
         g.tick();
 
         assert!(g.cells.contains_key(&Point { x: 5, y: 2 }));
@@ -186,7 +193,7 @@ mod tests {
                       Point { x: 5, y: 2 },
                       Point { x: 6, y: 2 },
                       Point { x: 5, y: 3 }];
-        let mut g = Grid::new(points.iter());
+        let mut g = Grid::with_points(points.iter());
         g.tick();
 
         let point = Point { x: 5, y: 2 };
@@ -198,7 +205,7 @@ mod tests {
 
     #[test]
     fn grid_tick_advances_the_generation() {
-        let mut g = Grid::new([].iter());
+        let mut g = Grid::empty();
         assert_eq!(0, g.generation);
         g.tick();
         assert_eq!(1, g.generation);
@@ -209,7 +216,7 @@ mod tests {
         let points = [Point { x: 0, y: 1 },
                       Point { x: -1, y: 0 },
                       Point { x: 1, y: 0 }];
-        let mut g = Grid::new(points.iter());
+        let mut g = Grid::with_points(points.iter());
 
         match g.cells.get(&points[0]) {
             Some(generation) => assert_eq!(0, generation.clone()),
@@ -228,14 +235,14 @@ mod tests {
 
     #[test]
     fn age_of_point_returns_none_if_point_is_dead() {
-        let g = Grid::new([].iter());
+        let g = Grid::empty();
         assert_eq!(None, g.age_of_point(&Point { x: 0, y: 0 }));
     }
 
     #[test]
     fn age_of_point_returns_some_age_if_point_is_alive() {
         let points = [Point { x: 0, y: 1 }];
-        let g = Grid::new(points.iter());
+        let g = Grid::with_points(points.iter());
         assert_eq!(Some(0), g.age_of_point(&points[0]));
     }
 }
