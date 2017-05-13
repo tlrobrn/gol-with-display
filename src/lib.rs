@@ -28,7 +28,7 @@ const NEIGHBORHOOD_OFFSETS: [Point; 8] = [Point { x: -1, y: 1 },
                                           Point { x: 0, y: -1 },
                                           Point { x: 1, y: -1 }];
 
-pub fn neighbors(point: Point) -> Vec<Point> {
+fn neighbors(point: Point) -> Vec<Point> {
     NEIGHBORHOOD_OFFSETS
         .iter()
         .map(|&offset| point + offset)
