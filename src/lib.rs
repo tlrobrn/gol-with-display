@@ -56,6 +56,10 @@ impl Grid {
         }
     }
 
+    pub fn age_of_point(&self, point: &Point) -> Option<u64> {
+        self.cells.get(point).map(|birth| self.generation - birth)
+    }
+
     pub fn tick(&mut self) -> &Self {
         self.generation += 1;
         let mut next_generation = HashMap::new();
@@ -220,5 +224,18 @@ mod tests {
             None => panic!("Point not found"),
         }
 
+    }
+
+    #[test]
+    fn age_of_point_returns_none_if_point_is_dead() {
+        let g = Grid::new([].iter());
+        assert_eq!(None, g.age_of_point(&Point { x: 0, y: 0 }));
+    }
+
+    #[test]
+    fn age_of_point_returns_some_age_if_point_is_alive() {
+        let points = [Point { x: 0, y: 1 }];
+        let g = Grid::new(points.iter());
+        assert_eq!(Some(0), g.age_of_point(&points[0]));
     }
 }
