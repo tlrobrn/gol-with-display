@@ -63,11 +63,21 @@ impl Grid {
         }
     }
 
+    pub fn add_point(&mut self, point: Point) -> &mut Self {
+        self.cells.entry(point).or_insert(self.generation);
+        self
+    }
+
+    pub fn remove_point(&mut self, point: &Point) -> &mut Self {
+        self.cells.remove(point);
+        self
+    }
+
     pub fn age_of_point(&self, point: &Point) -> Option<u64> {
         self.cells.get(point).map(|birth| self.generation - birth)
     }
 
-    pub fn tick(&mut self) -> &Self {
+    pub fn tick(&mut self) -> &mut Self {
         self.generation += 1;
         let mut next_generation = HashMap::new();
 
@@ -244,5 +254,36 @@ mod tests {
         let points = [Point { x: 0, y: 1 }];
         let g = Grid::with_points(points.iter());
         assert_eq!(Some(0), g.age_of_point(&points[0]));
+    }
+
+    #[test]
+    fn add_point_creates_new_point_with_the_current_generation() {
+        let point = Point { x: 0, y: 0 };
+        let mut g = Grid::empty();
+
+        g.tick().add_point(point);
+
+        assert_eq!(Some(0), g.age_of_point(&point));
+    }
+
+    #[test]
+    fn add_point_does_not_overwrite_an_existing_point() {
+        let point = Point { x: 0, y: 0 };
+        let mut g = Grid::with_points([point].iter());
+        g.generation = 1;
+
+        g.add_point(point);
+
+        assert_eq!(Some(1), g.age_of_point(&point));
+    }
+
+    #[test]
+    fn remove_point_removes_a_point() {
+        let point = Point { x: 0, y: 0 };
+        let mut g = Grid::with_points([point].iter());
+
+        g.remove_point(&point);
+
+        assert_eq!(None, g.age_of_point(&point));
     }
 }
