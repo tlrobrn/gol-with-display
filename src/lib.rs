@@ -138,9 +138,14 @@ mod tests {
 
         assert_eq!(expected_result, neighbors(p));
     }
+}
+
+#[cfg(test)]
+mod grid_tests {
+    use super::*;
 
     #[test]
-    fn grid_contains_point_initialized_with() {
+    fn contains_point_initialized_with() {
         let points = [Point { x: 5, y: 2 }];
         let g = Grid::with_points(points.iter());
 
@@ -149,7 +154,7 @@ mod tests {
     }
 
     #[test]
-    fn grid_tick_will_kill_living_cells_with_less_than_two_neighbors() {
+    fn tick_will_kill_living_cells_with_less_than_two_neighbors() {
         let points = [Point { x: 0, y: 0 },
                       Point { x: 5, y: 2 },
                       Point { x: 5, y: 3 }];
@@ -160,7 +165,7 @@ mod tests {
     }
 
     #[test]
-    fn grid_tick_will_kill_living_cells_with_more_than_three_neighbors() {
+    fn tick_will_kill_living_cells_with_more_than_three_neighbors() {
         let points = [Point { x: 0, y: 0 },
                       Point { x: 2, y: 0 },
                       Point { x: 1, y: 1 },
@@ -174,7 +179,7 @@ mod tests {
     }
 
     #[test]
-    fn grid_tick_will_make_a_cell_alive_if_it_has_3_neighbors() {
+    fn tick_will_make_a_cell_alive_if_it_has_3_neighbors() {
         let points = [Point { x: 0, y: 1 },
                       Point { x: -1, y: 0 },
                       Point { x: 1, y: 0 }];
@@ -187,7 +192,7 @@ mod tests {
     }
 
     #[test]
-    fn grid_tick_will_preserve_cells_with_2_neighbors() {
+    fn tick_will_preserve_cells_with_2_neighbors() {
         let points = [Point { x: 5, y: 1 },
                       Point { x: 5, y: 2 },
                       Point { x: 5, y: 3 }];
@@ -198,7 +203,7 @@ mod tests {
     }
 
     #[test]
-    fn grid_tick_will_preserve_cells_with_3_neighbors() {
+    fn tick_will_preserve_cells_with_3_neighbors() {
         let points = [Point { x: 5, y: 1 },
                       Point { x: 5, y: 2 },
                       Point { x: 6, y: 2 },
@@ -214,7 +219,7 @@ mod tests {
     }
 
     #[test]
-    fn grid_tick_advances_the_generation() {
+    fn tick_advances_the_generation() {
         let mut g = Grid::empty();
         assert_eq!(0, g.generation);
         g.tick();
@@ -222,7 +227,7 @@ mod tests {
     }
 
     #[test]
-    fn grid_tick_new_cells_are_stored_with_their_birth_generation() {
+    fn tick_new_cells_are_stored_with_their_birth_generation() {
         let points = [Point { x: 0, y: 1 },
                       Point { x: -1, y: 0 },
                       Point { x: 1, y: 0 }];
