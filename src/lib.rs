@@ -1,5 +1,8 @@
+extern crate rand;
+
 use std::ops::Add;
 use std::collections::HashMap;
+use rand::distributions::{IndependentSample, Range};
 
 
 #[derive(Clone, Copy, Hash, Eq, PartialEq, Debug)]
@@ -61,6 +64,23 @@ impl Grid {
             cells,
             generation: 0,
         }
+    }
+
+    pub fn random(top_left: Point, bottom_right: Point) -> Self {
+        let x_range = Range::new(top_left.x, bottom_right.x);
+        let y_range = Range::new(top_left.y, bottom_right.y);
+        let desired_count = (bottom_right.x - top_left.x) * (bottom_right.y - top_left.y) * 8 / 10;
+        let mut rng = rand::thread_rng();
+        let mut grid = Grid::empty();
+
+        for _ in 0..desired_count {
+            grid.add_point(Point {
+                               x: x_range.ind_sample(&mut rng),
+                               y: y_range.ind_sample(&mut rng),
+                           });
+        }
+
+        grid
     }
 
     pub fn add_point(&mut self, point: Point) -> &mut Self {
