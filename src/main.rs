@@ -17,16 +17,6 @@ struct View {
     bottom_right: Point,
 }
 
-impl View {
-    fn width(&self) -> f64 {
-        (self.bottom_right.x - self.top_left.x) as f64
-    }
-
-    fn height(&self) -> f64 {
-        (self.bottom_right.y - self.top_left.y) as f64
-    }
-}
-
 impl<'a> IntoIterator for &'a View {
     type Item = Point;
     type IntoIter = ViewIterator<'a>;
@@ -70,16 +60,28 @@ struct App {
     gl: GlGraphics,
     grid: Grid,
     view: View,
+    view_ratio: f64,
     elapsed: f64,
     generation: f64,
     rate: f64,
 }
 
 impl App {
-    fn new(open_gl: glutin_window::OpenGL, view: View) -> Self {
+    fn new(open_gl: glutin_window::OpenGL, window_width: i64, window_height: i64) -> Self {
+        let view_ratio = 0.1;
+
+        let view = View {
+            top_left: Point { x: 0, y: 0 },
+            bottom_right: Point {
+                x: (window_width as f64 * view_ratio) as i64,
+                y: (window_height as f64 * view_ratio) as i64,
+            },
+        };
+
         App {
             gl: GlGraphics::new(open_gl),
             grid: Grid::random(view.top_left, view.bottom_right),
+            view_ratio: view_ratio,
             view: view,
             elapsed: 0.0,
             generation: 0.0,
@@ -91,10 +93,7 @@ impl App {
         use graphics::*;
         const WHITE: [f32; 4] = [1.0; 4];
 
-        let (window_width, window_height) = (args.width as f64, args.height as f64);
-        let (view_width, view_height) = (self.view.width(), self.view.height());
-        let (width, height) = (window_width / view_width, window_height / view_height);
-        assert_eq!(width, height);
+        let width = 1.0 / self.view_ratio;
         let square = rectangle::square(0.0, 0.0, width);
         let view_iter = self.view.into_iter();
         let grid: &Grid = &self.grid;
@@ -109,7 +108,7 @@ impl App {
                         Some(age) => {
                             let x = point.x as f64;
                             let y = point.y as f64;
-                            let transform = c.transform.trans(x * width, y * height);
+                            let transform = c.transform.trans(x * width, y * width);
                             let shade_adjustment = 0.01 * age as f32;
                             let color = [0.0, 0.0, 0.0, 0.1 + shade_adjustment];
 
@@ -128,16 +127,22 @@ impl App {
             self.generation += 1.0;
         }
     }
+
+    fn resize(&mut self, new_width: u32, new_height: u32) {
+        self.view = View {
+            top_left: Point { x: 0, y: 0 },
+            bottom_right: Point {
+                x: (new_width as f64 * self.view_ratio) as i64,
+                y: (new_height as f64 * self.view_ratio) as i64,
+            },
+        };
+    }
 }
 
 fn main() {
     let opengl = OpenGL::V3_2;
     let window_width = 640;
     let window_height = 480;
-    let view = View {
-        top_left: Point { x: 0, y: 0 },
-        bottom_right: Point { x: 64, y: 48 },
-    };
 
     let mut window: Window = WindowSettings::new("gol",
                                                  [window_width as u32, window_height as u32])
@@ -146,7 +151,7 @@ fn main() {
             .build()
             .unwrap();
 
-    let mut app = App::new(opengl, view);
+    let mut app = App::new(opengl, window_width, window_height);
 
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
@@ -155,6 +160,10 @@ fn main() {
         }
         if let Some(u) = e.update_args() {
             app.update(&u);
+        }
+        if let Some(args) = e.resize_args() {
+            let (width, height) = (args[0], args[1]);
+            app.resize(width, height);
         }
     }
 }
