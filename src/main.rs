@@ -155,15 +155,8 @@ fn main() {
 
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut window) {
-        if let Some(r) = e.render_args() {
-            app.render(&r);
-        }
-        if let Some(u) = e.update_args() {
-            app.update(&u);
-        }
-        if let Some(args) = e.resize_args() {
-            let (width, height) = (args[0], args[1]);
-            app.resize(width, height);
-        }
+        e.render(|r| app.render(r));
+        e.update(|u| app.update(u));
+        e.resize(|w, h| app.resize(w, h));
     }
 }
