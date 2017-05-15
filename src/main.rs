@@ -83,14 +83,13 @@ impl App {
             view: view,
             elapsed: 0.0,
             generation: 0.0,
-            rate: 2.0,
+            rate: 10.0,
         }
     }
 
     fn render(&mut self, args: &RenderArgs) {
         use graphics::*;
         const WHITE: [f32; 4] = [1.0; 4];
-        const BLACK: [f32; 4] = [0.0, 0.0, 0.0, 1.0];
 
         let (window_width, window_height) = (args.width as f64, args.height as f64);
         let (view_width, view_height) = (self.view.width(), self.view.height());
@@ -123,6 +122,7 @@ impl App {
         self.elapsed += args.dt;
         if self.elapsed > self.generation / self.rate {
             self.grid.tick();
+            self.generation += 1.0;
         }
     }
 }
