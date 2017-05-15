@@ -106,11 +106,14 @@ impl App {
 
                 for point in view_iter {
                     match grid.age_of_point(&point) {
-                        Some(_age) => {
+                        Some(age) => {
                             let x = point.x as f64;
                             let y = point.y as f64;
                             let transform = c.transform.trans(x * width, y * height);
-                            rectangle(BLACK, square, transform, gl);
+                            let shade_adjustment = 0.01 * age as f32;
+                            let color = [0.0, 0.0, 0.0, 0.1 + shade_adjustment];
+
+                            rectangle(color, square, transform, gl);
                         }
                         None => {}
                     }
