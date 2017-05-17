@@ -57,7 +57,7 @@ impl Grid {
     {
         let mut cells = HashMap::new();
         for point in points {
-            cells.insert(point.clone(), 0);
+            cells.insert(*point, 0);
         }
 
         Grid {
@@ -101,11 +101,11 @@ impl Grid {
         self.generation += 1;
         let mut next_generation = HashMap::new();
 
-        for (cell, generation) in self.cells.iter() {
+        for (cell, generation) in &self.cells {
             let count = self.count_neighbors(cell);
 
             if count > 1 && count < 4 {
-                next_generation.insert(cell.clone(), generation.clone());
+                next_generation.insert(*cell, *generation);
             }
         }
 
@@ -113,7 +113,7 @@ impl Grid {
             let count = self.count_neighbors(&cell);
 
             if count == 3 {
-                next_generation.insert(cell, self.generation.clone());
+                next_generation.insert(cell, self.generation);
             }
         }
 
