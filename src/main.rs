@@ -65,10 +65,13 @@ struct App {
     generation: f64,
     rate: f64,
     mouse_down: bool,
+    window_width: u32,
+    window_height: u32,
+    cursor: Option<Point>,
 }
 
 impl App {
-    fn new(open_gl: piston_window::OpenGL, window_width: i64, window_height: i64) -> Self {
+    fn new(open_gl: piston_window::OpenGL, window_width: u32, window_height: u32) -> Self {
         let point_width = 10.0;
 
         let view = View {
@@ -88,6 +91,9 @@ impl App {
             generation: 0.0,
             rate: 10.0,
             mouse_down: false,
+            window_width: window_width,
+            window_height: window_height,
+            cursor: None,
         }
     }
 
@@ -107,23 +113,23 @@ impl App {
                 clear(WHITE, gl);
 
                 for point in view_iter {
-                    match grid.age_of_point(&point) {
-                        Some(age) => {
-                            let x = (point.x - base_point.x) as f64;
-                            let y = (point.y - base_point.y) as f64;
-                            let transform = c.transform.trans(x * width, y * width);
-                            let shade_adjustment = 0.01 * age as f32;
-                            let color = [0.0, 0.0, 0.0, 0.15 + shade_adjustment];
+                    if let Some(age) = grid.age_of_point(&point) {
+                        let x = (point.x - base_point.x) as f64;
+                        let y = (point.y - base_point.y) as f64;
+                        let transform = c.transform.trans(x * width, y * width);
+                        let shade_adjustment = 0.01 * age as f32;
+                        let color = [0.0, 0.0, 0.0, 0.15 + shade_adjustment];
 
-                            rectangle(color, square, transform, gl);
-                        }
-                        None => {}
+                        rectangle(color, square, transform, gl);
                     }
                 }
             });
     }
 
     fn update(&mut self, args: &UpdateArgs) {
+        if self.mouse_down {
+            return;
+        }
         self.elapsed += args.dt;
         if self.elapsed > self.generation / self.rate {
             self.grid.tick();
@@ -131,21 +137,9 @@ impl App {
         }
     }
 
-    fn resize(&mut self, new_width: u32, new_height: u32) {
-        self.view = View {
-            top_left: Point { x: 0, y: 0 },
-            bottom_right: Point {
-                x: (new_width as f64 / self.point_width) as i64,
-                y: (new_height as f64 / self.point_width) as i64,
-            },
-        };
-    }
-
     fn zoom(&mut self, adjustment: f64) {
         const UPPER_BOUND: f64 = 100.0;
         const LOWER_BOUND: f64 = 1.0;
-
-        let current_width = self.point_width;
 
         if adjustment > 0.0 {
             self.point_width = UPPER_BOUND.min(self.point_width * 1.5);
@@ -153,13 +147,11 @@ impl App {
             self.point_width = LOWER_BOUND.max(self.point_width / 1.5);
         }
 
-        let Point { x, y } = self.view.bottom_right;
-
         self.view = View {
             top_left: Point { x: 0, y: 0 },
             bottom_right: Point {
-                x: (current_width / self.point_width * x as f64) as i64,
-                y: (current_width / self.point_width * y as f64) as i64,
+                x: (self.window_width as f64 / self.point_width) as i64,
+                y: (self.window_height as f64 / self.point_width) as i64,
             },
         };
     }
@@ -182,15 +174,14 @@ impl App {
 
 fn main() {
     let opengl = OpenGL::V3_2;
-    let window_width = 640;
-    let window_height = 480;
+    let window_width: u32 = 640;
+    let window_height: u32 = 480;
 
-    let mut window: PistonWindow = WindowSettings::new("gol",
-                                                       [window_width as u32, window_height as u32])
-            .opengl(opengl)
-            .exit_on_esc(true)
-            .build()
-            .unwrap();
+    let mut window: PistonWindow = WindowSettings::new("gol", [window_width, window_height])
+        .opengl(opengl)
+        .exit_on_esc(true)
+        .build()
+        .unwrap();
 
     let mut app = App::new(opengl, window_width, window_height);
 
@@ -198,22 +189,19 @@ fn main() {
     while let Some(e) = events.next(&mut window) {
         e.render(|r| app.render(r));
         e.update(|u| app.update(u));
-        //e.resize(|w, h| app.resize(w, h));
-        //e.mouse_scroll(|_dx, dy| app.zoom(dy));
+        e.mouse_scroll(|_dx, dy| app.zoom(dy));
         e.mouse_relative(|dx, dy| app.shift(dx, dy));
 
         if let Some(button) = e.press_args() {
-            match button {
-                Button::Mouse(_button) => app.mouse_down = true,
-                _ => {}
-            };
+            if let Button::Mouse(_button) = button {
+                app.mouse_down = true;
+            }
         }
 
         if let Some(button) = e.release_args() {
-            match button {
-                Button::Mouse(_button) => app.mouse_down = false,
-                _ => {}
-            };
+            if let Button::Mouse(_button) = button {
+                app.mouse_down = false;
+            }
         }
     }
 }
