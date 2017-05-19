@@ -147,12 +147,19 @@ impl App {
             self.point_width = LOWER_BOUND.max(self.point_width / 1.5);
         }
 
+        let center = Point {
+            x: (self.view.bottom_right.x - self.view.top_left.x) / 2,
+            y: (self.view.bottom_right.y - self.view.top_left.y) / 2,
+        };
+
+        let point_adjustment = Point {
+            x: (self.window_width as f64 / (2.0 * self.point_width)) as i64,
+            y: (self.window_height as f64 / (2.0 * self.point_width)) as i64,
+        };
+
         self.view = View {
-            top_left: Point { x: 0, y: 0 },
-            bottom_right: Point {
-                x: (self.window_width as f64 / self.point_width) as i64,
-                y: (self.window_height as f64 / self.point_width) as i64,
-            },
+            top_left: center - point_adjustment,
+            bottom_right: center + point_adjustment,
         };
     }
 

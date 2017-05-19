@@ -1,6 +1,6 @@
 extern crate rand;
 
-use std::ops::Add;
+use std::ops::{Add, Sub};
 use std::collections::HashMap;
 use rand::distributions::{IndependentSample, Range};
 
@@ -18,6 +18,17 @@ impl Add for Point {
         Point {
             x: self.x + other.x,
             y: self.y + other.y,
+        }
+    }
+}
+
+impl Sub for Point {
+    type Output = Point;
+
+    fn sub(self, other: Point) -> Point {
+        Point {
+            x: self.x - other.x,
+            y: self.y - other.y,
         }
     }
 }
